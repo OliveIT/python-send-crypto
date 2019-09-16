@@ -51,8 +51,6 @@ def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, fromWIF ):
             return response
 
         weiBalance = w3.eth.getBalance(fromAddress)
-        print ('\nBalance (wei): ')
-        print (weiBalance)
 
         # build transaction
 
@@ -82,10 +80,17 @@ def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, fromWIF ):
         signedTx = w3.eth.account.sign_transaction(txInfo, fromWIF)
 
         # push transaction
-        result = w3.eth.sendRawTransaction(signedTx.rawTransaction)
+
+        result = requests.post(
+            url='https://api.blockcypher.com/v1/eth/main/txs/push',
+            params={'token' : APIKEY},
+            json={ 'tx': (signedTx.rawTransaction.hex())[2:] }
+        )
+
+        result.raise_for_status()
 
         response['status'] = 'success'
-        response['result'] = result.hex()
+        response['result'] = result.json()
         return response
     except TypeError as err:
         response['error'] = str(err)

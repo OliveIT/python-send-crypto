@@ -15,6 +15,7 @@ def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, gasLimit, fromWIF ):
         weiValue (int): Transaction amount in Wei.
             Pass -1 to send entire balance.
         weiGasPrice (int): Gas price in Wei.
+        gasLimit (int): Gas limit.
         fromWIF (str): WIF string of sender.
 
     Returns:
@@ -33,16 +34,21 @@ def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, gasLimit, fromWIF ):
         'status': 'failure',
     }
     try:
+        fromAddress = Web3.toChecksumAddress(fromAddress)
         # validation
         if len(fromAddress) != 42:
-            response['error'] = "fromAddress should be 34 letters."
+            response['error'] = "fromAddress should be 42 letters."
             return response
+
+        toAddress = Web3.toChecksumAddress(toAddress)
         if len(toAddress) != 42:
-            response['error'] = "toAddress should be 34 letters."
+            response['error'] = "toAddress should be 42 letters."
             return response
+
         if len(fromWIF) != 64:
-            response['error'] = "fromWIF should be 52 letters."
+            response['error'] = "fromWIF should be 64 letters."
             return response
+
         if not gasLimit >= 21000:
             response['error'] = "gasLimit should be equal or greater than 21000."
             return response
@@ -90,10 +96,12 @@ def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, gasLimit, fromWIF ):
             json={ 'tx': (signedTx.rawTransaction.hex())[2:] }
         )
 
-        result.raise_for_status()
+        if result: # success
+            response['status'] = 'success'
+            response['result'] = result.json()
+            return response
 
-        response['status'] = 'success'
-        response['result'] = result.json()
+        response['error'] = result.json()
         return response
     except TypeError as err:
         response['error'] = str(err)

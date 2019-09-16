@@ -43,7 +43,7 @@ def sendBTC (fromAddress, toAddress, satValue, satFee, fromWIF ):
 
         key = PrivateKeyTestnet(wif=fromWIF)
         if key.address != fromAddress:
-            response['error'] = "fromAddress can't be derived from fromWIF."
+            response['error'] = "fromAddress cannot be derived from fromWIF."
             return response
 
         key.get_balance(currency='satoshi')

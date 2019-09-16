@@ -6,7 +6,7 @@ INFURAKEY='...'
 
 w3 = Web3(HTTPProvider('https://mainnet.infura.io/' + INFURAKEY))
 
-def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, fromWIF ):
+def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, gasLimit, fromWIF ):
     """Send testnet Ether from `fromAddress` to `toAddress`.
 
     Args:
@@ -43,8 +43,11 @@ def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, fromWIF ):
         if len(fromWIF) != 64:
             response['error'] = "fromWIF should be 52 letters."
             return response
+        if not gasLimit >= 21000:
+            response['error'] = "gasLimit should be equal or greater than 21000."
+            return response
 
-        account = w3.eth.account.from_key(fromWIF);
+        account = w3.eth.account.from_key(fromWIF)
 
         if account.address != fromAddress:
             response['error'] = "fromAddress cannot be derived from fromWIF."
@@ -57,7 +60,7 @@ def sendETH (fromAddress, toAddress, weiValue, weiGasPrice, fromWIF ):
         txInfo = {
             'nonce': w3.eth.getTransactionCount(fromAddress),
             'gasPrice': weiGasPrice, # w3.eth.gasPrice
-            'gas': 21000,
+            'gas': gasLimit,
             'to': toAddress,
             'value': 0
         }
